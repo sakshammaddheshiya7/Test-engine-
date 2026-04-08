@@ -1,0 +1,234 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email in ["deepu75245564@gmail.com"];
+    }
+
+    match /questions/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /chapters/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /topics/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow create, update: if isSignedIn() && request.auth.uid == userId;
+      allow delete: if isAdmin();
+
+      match /mistake_book/{docId} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+      }
+
+      match /saved_questions/{docId} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+      }
+
+      match /test_history/{docId} {
+        allow read, write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      }
+
+      match /preferences/{docId} {
+        allow read, write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      }
+
+      match /device_tokens/{docId} {
+        allow read, write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      }
+    }
+
+    match /notifications/{docId} {
+      allow read: if isSignedIn();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(["readBy", "updatedAt"])
+      );
+    }
+
+    match /user_segments/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow create, update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /app_error_logs/{docId} {
+      allow create: if isSignedIn();
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    match /system_health_snapshots/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /question_approval_queue/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /pdf_library/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /announcements/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /feedback_reports/{docId} {
+      allow create: if isSignedIn();
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /knowledge_base/{docId} {
+      allow read: if isSignedIn() && (resource.data.status == "published" || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    match /student_registry/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /platform_settings/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /admin_roles/{userId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /live_broadcasts/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /platform_roadmap/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /support_threads/{threadId} {
+      allow read: if isSignedIn() && (request.auth.uid == threadId || isAdmin());
+      allow create, update: if isSignedIn() && (request.auth.uid == threadId || isAdmin());
+      allow delete: if isAdmin();
+
+      match /messages/{messageId} {
+        allow read: if isSignedIn() && (request.auth.uid == threadId || isAdmin());
+        allow create: if isSignedIn() && (request.auth.uid == threadId || isAdmin());
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    match /assistant_memory/{userId} {
+      allow read, write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+
+    match /user_sessions/{docId} {
+      allow read: if isSignedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create, update: if isSignedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    match /daily_admin_reports/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /scheduled_jobs/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /question_versions/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /system_backups/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /system_load_snapshots/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /firestore_index_advisor/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /live_activity/{userId} {
+      allow read: if isAdmin();
+      allow write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+
+    match /content_versions/{docId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /ai_generations/{docId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /admin_audit_logs/{docId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /leaderboard_public/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+
+    match /formulas/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /live_tests/{testId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+
+      match /participants/{userId} {
+        allow read: if isSignedIn();
+        allow write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      }
+
+      match /attempts/{attemptId} {
+        allow read: if isSignedIn();
+        allow write: if isSignedIn();
+      }
+    }
+
+    match /question_discussions/{threadId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+
+      match /messages/{messageId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    match /{document=**} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+  }
+}
